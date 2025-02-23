@@ -63,7 +63,13 @@ class ProductController extends Controller
         }
     }
 
-    public function show() {}
+    public function show(Product $product)
+    {
+        return response()->json([
+            'message' => 'Product added successfully',
+            'data' => new ProductResource($product),
+        ], 200);
+    }
 
     public function update() {}
 

@@ -71,7 +71,40 @@ class ProductController extends Controller
         ], 200);
     }
 
-    public function update() {}
+    public function update(Request $request, Product $product) 
+    {
+        $validator = Validator($request->all(), [
+            'name' => 'required|max:255|string',
+            'description' => 'required',
+            'price' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors(),
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $product->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'price' => $request->price,
+            ]);
+            DB::commit();
+            return response()->json([
+                'message' => 'Product updated successfully',
+                'data' => new ProductResource($product),
+            ], 200);
+        } catch (\Exception $e) {
+            Log::alert($e->getMessage());
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Internal server error',
+            ], 500);
+        }
+    }
 
     public function destroy() {}
 }

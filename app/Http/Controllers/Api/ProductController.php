@@ -106,5 +106,22 @@ class ProductController extends Controller
         }
     }
 
-    public function destroy() {}
+    public function destroy(Product $product) 
+    {
+        DB::beginTransaction();
+        try {
+            $product->delete();
+            DB::commit();
+            return response()->json([
+                'message' => 'Product deleted successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            Log::alert($e->getMessage());
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Internal server error',
+            ], 500);
+        }
+
+    }
 }
